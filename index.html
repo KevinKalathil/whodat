@@ -111,8 +111,6 @@
   <div class="result-card" id="result-card">
     <span class="cat-emoji" id="cat-emoji"></span>
     <div id="outcome-msg"></div>
-    <img id="reveal-photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;object-position:top;margin:0 auto 0.5rem;display:block;border:2px solid var(--color-border-tertiary);" src="" alt="" />
-    <div class="reveal-name" id="reveal-name"></div>
     <div class="reveal-cat" id="reveal-cat"></div>
     <div class="funfact" id="funfact"></div>
     <button class="next-btn" onclick="nextPerson()">Next →</button>
@@ -216,7 +214,6 @@ const people=[
   {name:"Jimi Hendrix",cat:"Musician",photo:"famous_people_images/090_Jimi Hendrix.jpg",fact:"<strong>The greatest rock guitarist ever.</strong> His Woodstock performance of the Star-Spangled Banner is iconic. Died at 27."},
   {name:"Kurt Cobain",cat:"Musician",photo:"famous_people_images/091_Kurt Cobain.jpg",fact:"<strong>The voice of grunge.</strong> Nirvana's Smells Like Teen Spirit defined a generation. He died by suicide at age 27."},
   {name:"Tupac Shakur",cat:"Musician",photo:"famous_people_images/092_Tupac Shakur.jpg",fact:"<strong>Rap's most iconic voice.</strong> All Eyez on Me remains a landmark album. He was murdered at age 25 in a drive-by shooting."},
-  {name:"The Notorious BIG",cat:"Musician",photo:"famous_people_images/093_The Notorious B.I.G..jpg",fact:"<strong>East Coast rap king.</strong> Ready to Die is a hip-hop masterpiece. Biggie Smalls was killed in a drive-by in 1997."},
   {name:"Jay-Z",cat:"Musician",photo:"famous_people_images/094_Jay-Z.jpg",fact:"<strong>Hip-hop's first billionaire.</strong> Founded Roc-A-Fella Records, married Beyoncé, and has 23 Grammy Awards."},
   {name:"Kanye West",cat:"Musician",photo:"famous_people_images/095_Kanye West.jpg",fact:"<strong>Genre-bending rap producer.</strong> The College Dropout and Graduation reshaped hip-hop, and Yeezy reshaped sneakers."},
   {name:"Taylor Swift",cat:"Musician",photo:"famous_people_images/096_Taylor Swift.jpg",fact:"<strong>Pop's biggest star.</strong> The Eras Tour became the highest-grossing concert tour in history and she has 14 Grammy Awards."},
@@ -409,8 +406,6 @@ function endGame(success){
   else msg.innerHTML=`<div class="outcome-loss">${roasts[Math.floor(Math.random()*roasts.length)]}</div>`;
   sessionHistory.push({name:current.name,photo:current.photo,won:success,guesses:Array.from(document.getElementById('guess-feedback').querySelectorAll('.gpill')).map(p=>p.innerText.trim())});
   renderHistory();
-  document.getElementById('reveal-photo').src=current.photo;
-  document.getElementById('reveal-name').textContent=current.name;
   document.getElementById('reveal-cat').textContent=current.cat;
   document.getElementById('funfact').innerHTML=current.fact;
   updateScore();
