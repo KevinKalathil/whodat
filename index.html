@@ -74,6 +74,20 @@
     .funfact strong{color:var(--color-text-primary);font-weight:500}
     .next-btn{margin-top:1rem;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:9px 24px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer}
     .next-btn:hover{background:var(--color-background-secondary)}
+    .history-toggle{margin-top:2rem;padding-top:1.25rem;border-top:0.5px solid var(--color-border-tertiary);text-align:center}
+    .history-toggle button{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:5px 14px;border-radius:99px;border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);cursor:pointer;letter-spacing:0.3px}
+    .history-toggle button:hover{background:var(--color-background-secondary)}
+    .history-list{margin-top:1rem;display:none;text-align:left}
+    .history-list.open{display:block}
+    .history-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+    .history-item:last-child{border-bottom:none}
+    .history-thumb{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top;flex-shrink:0;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+    .history-info{flex:1;min-width:0}
+    .history-name{font-size:13px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .history-guesses{font-size:11px;color:var(--color-text-secondary);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .history-outcome{font-size:11px;font-weight:500;flex-shrink:0}
+    .history-outcome.win{color:var(--color-text-success)}
+    .history-outcome.loss{color:var(--color-text-danger)}
   </style>
 </head>
 <body>
@@ -102,6 +116,10 @@
     <div class="reveal-cat" id="reveal-cat"></div>
     <div class="funfact" id="funfact"></div>
     <button class="next-btn" onclick="nextPerson()">Next →</button>
+  </div>
+  <div class="history-toggle" id="history-toggle" style="display:none">
+    <button onclick="toggleHistory()" id="history-btn">Show session history</button>
+    <div class="history-list" id="history-list"></div>
   </div>
 </div>
 
@@ -165,8 +183,9 @@ const people=[
   {name:"Plato",cat:"Historical / Political",photo:"famous_people_images/056_Plato.jpg",fact:"<strong>Founded the Academy.</strong> Student of Socrates and wrote The Republic on the ideal society."},
   {name:"Aristotle",cat:"Historical / Political",photo:"famous_people_images/057_Aristotle.jpg",fact:"<strong>Ancient polymath.</strong> Tutored Alexander the Great and founded the Lyceum."},
   {name:"Confucius",cat:"Historical / Political",photo:"famous_people_images/058_Confucius.jpg",fact:"<strong>Chinese ethics teacher.</strong> His Analects have guided governance and morality for over two thousand years."},
+  {name:"Laozi",cat:"Historical / Political",photo:"famous_people_images/059_Laozi.jpg",fact:"<strong>Taoism originator.</strong> The Tao Te Ching teaches harmony with nature — though Laozi himself may be a mythical figure."},
+  {name:"Buddha",cat:"Historical / Political",photo:"famous_people_images/060_Buddha.jpg",fact:"<strong>Founder of Buddhism.</strong> Reached enlightenment under a Bodhi tree and taught the Four Noble Truths to end suffering."},
   {name:"Jesus Christ",cat:"Historical / Political",photo:"famous_people_images/061_Jesus Christ.jpg",fact:"<strong>Central figure of Christianity.</strong> His teachings on love and resurrection shaped the world's largest religion."},
-  {name:"Muhammad",cat:"Historical / Political",photo:"famous_people_images/062_Muhammad.jpg",fact:"<strong>Prophet of Islam.</strong> Received revelations forming the Quran and unified Arabia under a new faith."},
   {name:"Joan of Arc",cat:"Historical / Political",photo:"famous_people_images/063_Joan of Arc.jpg",fact:"<strong>French military saint.</strong> Led the French army at age 17, was burned at the stake by the English, and later canonized."},
   {name:"Queen Elizabeth I",cat:"Historical / Political",photo:"famous_people_images/064_Queen Elizabeth I.jpg",fact:"<strong>Elizabethan England's ruler.</strong> Defeated the Spanish Armada and presided over a Golden Age of exploration and the arts."},
   {name:"Queen Victoria",cat:"Historical / Political",photo:"famous_people_images/065_Queen Victoria.jpg",fact:"<strong>Victorian Era monarch.</strong> Britain's longest-reigning monarch at the time, ruling over the peak of the British Empire."},
@@ -215,7 +234,7 @@ const happyCats=["😸","😻","😺","🥳","✨"];
 const roasts=["Not a clue, huh. They've been on magazine covers for decades.","This person is literally in every history textbook. Every. Single. One.","They have a Wikipedia page longer than most novels. And yet.","A statue exists of this person. In multiple countries.","They were on the news the day you were born. Probably.","Your sports knowledge left. Your general knowledge followed."];
 const wins=["Look at you! One braincell and it came through.","Correct! Your cultural literacy lives another day.","Yes! Proof that doomscrolling teaches you something.","There it is. You're not completely lost."];
 
-let current=null,guessesLeft=2,won=0,lost=0,streak=0,usedIdx=[];
+let current=null,guessesLeft=2,won=0,lost=0,streak=0,usedIdx=[],sessionHistory=[];
 
 function norm(s){return s.toLowerCase().replace(/[^a-z]/g,'');}
 function normFull(s){return s.toLowerCase().replace(/[^a-z\s]/g,'').trim();}
@@ -283,6 +302,36 @@ function wordStatus(gw,tw){
   const sim=1-(lev(gw,tw)/Math.max(gw.length,tw.length));
   if(gw.length>=4&&sim>=0.6)return 'close';
   return 'wrong';
+}
+
+function toggleHistory(){
+  const list=document.getElementById('history-list');
+  const btn=document.getElementById('history-btn');
+  const open=list.classList.toggle('open');
+  btn.textContent=open?'Hide session history':'Show session history';
+}
+
+function renderHistory(){
+  const toggle=document.getElementById('history-toggle');
+  const list=document.getElementById('history-list');
+  if(sessionHistory.length===0){toggle.style.display='none';return;}
+  toggle.style.display='block';
+  list.innerHTML='';
+  // most recent first
+  [...sessionHistory].reverse().forEach(entry=>{
+    const item=document.createElement('div');
+    item.className='history-item';
+    const guessText=entry.guesses.length>0?entry.guesses.join(', '):'no wrong guesses';
+    item.innerHTML=`
+      <img class="history-thumb" src="${entry.photo}" alt="${entry.name}" />
+      <div class="history-info">
+        <div class="history-name">${entry.name}</div>
+        <div class="history-guesses">Wrong guesses: ${guessText}</div>
+      </div>
+      <div class="history-outcome ${entry.won?'win':'loss'}">${entry.won?'✓':'✗'}</div>
+    `;
+    list.appendChild(item);
+  });
 }
 
 function nextPerson(){
@@ -358,6 +407,8 @@ function endGame(success){
   const msg=document.getElementById('outcome-msg');
   if(success)msg.innerHTML=`<div class="outcome-win">${wins[Math.floor(Math.random()*wins.length)]}</div>`;
   else msg.innerHTML=`<div class="outcome-loss">${roasts[Math.floor(Math.random()*roasts.length)]}</div>`;
+  sessionHistory.push({name:current.name,photo:current.photo,won:success,guesses:Array.from(document.getElementById('guess-feedback').querySelectorAll('.gpill')).map(p=>p.innerText.trim())});
+  renderHistory();
   document.getElementById('reveal-photo').src=current.photo;
   document.getElementById('reveal-name').textContent=current.name;
   document.getElementById('reveal-cat').textContent=current.cat;
