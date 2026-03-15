@@ -79,7 +79,7 @@
 <body>
 <div class="gw">
   <div class="gtitle">Who Dat?</div>
-  <div class="gsub">Famous faces. 2 guesses.</div>
+  <div class="gsub">Famous faces. 2 guesses. No hints.</div>
   <div class="scorebar">
     <span>Won <strong id="sw">0</strong></span>
     <span>Lost <strong id="sl">0</strong></span>
@@ -165,8 +165,6 @@ const people=[
   {name:"Plato",cat:"Historical / Political",photo:"famous_people_images/056_Plato.jpg",fact:"<strong>Founded the Academy.</strong> Student of Socrates and wrote The Republic on the ideal society."},
   {name:"Aristotle",cat:"Historical / Political",photo:"famous_people_images/057_Aristotle.jpg",fact:"<strong>Ancient polymath.</strong> Tutored Alexander the Great and founded the Lyceum."},
   {name:"Confucius",cat:"Historical / Political",photo:"famous_people_images/058_Confucius.jpg",fact:"<strong>Chinese ethics teacher.</strong> His Analects have guided governance and morality for over two thousand years."},
-  {name:"Laozi",cat:"Historical / Political",photo:"famous_people_images/059_Laozi.jpg",fact:"<strong>Taoism originator.</strong> The Tao Te Ching teaches harmony with nature — though Laozi himself may be a mythical figure."},
-  {name:"Buddha",cat:"Historical / Political",photo:"famous_people_images/060_Buddha.jpg",fact:"<strong>Founder of Buddhism.</strong> Reached enlightenment under a Bodhi tree and taught the Four Noble Truths to end suffering."},
   {name:"Jesus Christ",cat:"Historical / Political",photo:"famous_people_images/061_Jesus Christ.jpg",fact:"<strong>Central figure of Christianity.</strong> His teachings on love and resurrection shaped the world's largest religion."},
   {name:"Muhammad",cat:"Historical / Political",photo:"famous_people_images/062_Muhammad.jpg",fact:"<strong>Prophet of Islam.</strong> Received revelations forming the Quran and unified Arabia under a new faith."},
   {name:"Joan of Arc",cat:"Historical / Political",photo:"famous_people_images/063_Joan of Arc.jpg",fact:"<strong>French military saint.</strong> Led the French army at age 17, was burned at the stake by the English, and later canonized."},
@@ -199,6 +197,7 @@ const people=[
   {name:"Jimi Hendrix",cat:"Musician",photo:"famous_people_images/090_Jimi Hendrix.jpg",fact:"<strong>The greatest rock guitarist ever.</strong> His Woodstock performance of the Star-Spangled Banner is iconic. Died at 27."},
   {name:"Kurt Cobain",cat:"Musician",photo:"famous_people_images/091_Kurt Cobain.jpg",fact:"<strong>The voice of grunge.</strong> Nirvana's Smells Like Teen Spirit defined a generation. He died by suicide at age 27."},
   {name:"Tupac Shakur",cat:"Musician",photo:"famous_people_images/092_Tupac Shakur.jpg",fact:"<strong>Rap's most iconic voice.</strong> All Eyez on Me remains a landmark album. He was murdered at age 25 in a drive-by shooting."},
+  {name:"The Notorious BIG",cat:"Musician",photo:"famous_people_images/093_The Notorious B.I.G..jpg",fact:"<strong>East Coast rap king.</strong> Ready to Die is a hip-hop masterpiece. Biggie Smalls was killed in a drive-by in 1997."},
   {name:"Jay-Z",cat:"Musician",photo:"famous_people_images/094_Jay-Z.jpg",fact:"<strong>Hip-hop's first billionaire.</strong> Founded Roc-A-Fella Records, married Beyoncé, and has 23 Grammy Awards."},
   {name:"Kanye West",cat:"Musician",photo:"famous_people_images/095_Kanye West.jpg",fact:"<strong>Genre-bending rap producer.</strong> The College Dropout and Graduation reshaped hip-hop, and Yeezy reshaped sneakers."},
   {name:"Taylor Swift",cat:"Musician",photo:"famous_people_images/096_Taylor Swift.jpg",fact:"<strong>Pop's biggest star.</strong> The Eras Tour became the highest-grossing concert tour in history and she has 14 Grammy Awards."},
@@ -280,8 +279,10 @@ function lev(a,b){
 
 function wordStatus(gw,tw){
   if(gw===tw)return 'correct';
-  if(tw.startsWith(gw)||gw.startsWith(tw))return 'close';
-  return 1-(lev(gw,tw)/Math.max(gw.length,tw.length))>=0.5?'close':'wrong';
+  if(gw.length>=3&&tw.length>=3&&(tw.startsWith(gw)||gw.startsWith(tw)))return 'close';
+  const sim=1-(lev(gw,tw)/Math.max(gw.length,tw.length));
+  if(gw.length>=4&&sim>=0.6)return 'close';
+  return 'wrong';
 }
 
 function nextPerson(){
@@ -317,7 +318,8 @@ function submitGuess(){
   const gn=normFull(guess);
   const targetWords=cn.split(' ').filter(w=>w.length>1);
   const guessWords=gn.split(' ').filter(w=>w.length>1);
-  const correct=gn===cn||guessWords.every(gw=>targetWords.some(tw=>wordStatus(gw,tw)==='correct'))||targetWords.some(tw=>tw===gn);
+  const correct=gn===cn||
+    (guessWords.length>0&&guessWords.every(gw=>targetWords.some(tw=>gw===tw)));
   if(correct){
     won++;streak++;
     renderLayout(current.name,guess,true);
